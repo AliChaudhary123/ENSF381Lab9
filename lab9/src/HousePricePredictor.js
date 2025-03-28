@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default async function HousePricePredictor() {
+export default function HousePricePredictor() {
   const [formData, setFormData] = useState({
     city: "",
     province: "",
@@ -17,34 +17,38 @@ export default async function HousePricePredictor() {
   });
 
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [predictedPrice, setPredictedPrice] = useState(null);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    try {
+      const response = await fetch(
+        "http://127.0.0.1:5000/predict_house_price",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(formData),
+        }
+      );
+
+      const result = await response.json();
+      setPredictedPrice(result.predicted_price);
+      setFormSubmitted(true);
+    } catch (error) {
+      console.error("Error submitting form:", error);
+    }
   };
 
-  const handleInputChange = async (e) => {
+  const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
     setFormData((prevData) => ({
       ...prevData,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
-
-  try {
-    const response = await fetch("/predict_house_price", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(formData),
-    });
-
-    const result = await response.json();
-    console.log(result);
-    setFormSubmitted(true);
-  } catch (error) {
-    console.error("Error submitting form:", error);
-  }
 
   return (
     <>
@@ -118,12 +122,14 @@ export default async function HousePricePredictor() {
           <label>Latitude:</label>
           <input
             name="latitude"
+            type="number"
             value={formData.latitude}
             onChange={handleInputChange}
           ></input>
           <label>Longitude:</label>
           <input
             name="longitude"
+            type="number"
             value={formData.longitude}
             onChange={handleInputChange}
           ></input>
@@ -142,18 +148,21 @@ export default async function HousePricePredictor() {
           <label>Beds:</label>
           <input
             name="beds"
+            type="number"
             value={formData.beds}
             onChange={handleInputChange}
           ></input>
           <label>Baths:</label>
           <input
             name="baths"
+            type="number"
             value={formData.baths}
             onChange={handleInputChange}
           ></input>
           <label>Square Feet:</label>
           <input
             name="sq_feet"
+            type="number"
             value={formData.sq_feet}
             onChange={handleInputChange}
           ></input>
@@ -163,9 +172,9 @@ export default async function HousePricePredictor() {
             value={formData.furnishing}
             onChange={handleInputChange}
           >
-            <option>Unfurnished</option>
-            <option>Partially Furnished</option>
-            <option>Fully Furnished</option>
+            <option value="Unfurnished">Unfurnished</option>
+            <option value="Partially Furnished">Partially Furnished</option>
+            <option value="Fully Furnished">Fully Furnished</option>
           </select>
           <label>Smoking:</label>
           <input
@@ -182,7 +191,9 @@ export default async function HousePricePredictor() {
           ></input>
           <input className="submit-button" type="submit"></input>
         </form>
-        {{ formSubmitted } && <div className="results">{}</div>}
+        {formSubmitted && (
+          <div className="results">Predicted Rent Price: {predictedPrice}</div>
+        )}
       </div>
     </>
   );
