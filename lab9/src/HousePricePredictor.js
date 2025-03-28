@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-export default function HousePricePredictor() {
+export default async function HousePricePredictor() {
   const [formData, setFormData] = useState({
     city: "",
     province: "",
@@ -22,8 +22,8 @@ export default function HousePricePredictor() {
     e.preventDefault();
   };
 
-  const handleInputChange = (e) => {
-    const { name, value, checked } = e.target;
+  const handleInputChange = async (e) => {
+    const { name, value, type, checked } = e.target;
     setFormData((prevData) => ({
       ...prevData,
       [name]: type === "checkbox" ? checked : value,
@@ -40,12 +40,11 @@ export default function HousePricePredictor() {
     });
 
     const result = await response.json();
-    console.log(result); 
+    console.log(result);
     setFormSubmitted(true);
   } catch (error) {
     console.error("Error submitting form:", error);
   }
-};
 
   return (
     <>
@@ -183,7 +182,7 @@ export default function HousePricePredictor() {
           ></input>
           <input className="submit-button" type="submit"></input>
         </form>
-        {{formSubmitted} && <div className="results">{}</div>}
+        {{ formSubmitted } && <div className="results">{}</div>}
       </div>
     </>
   );
